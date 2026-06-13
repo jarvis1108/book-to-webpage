@@ -311,7 +311,17 @@ INDEX.md 是常驻小核心（~4K），含 Core Frameworks + 章节索引 + 主�
 
 ### Step 2.7 自检
 
-逐项验证：
+#### 自动化验证（Playwright）
+
+生成 HTML 后，**必须**运行验证脚本：
+
+```bash
+node ~/.claude/skills/book-to-webpage/scripts/verify-page.js <输出文件路径>
+```
+
+该脚本自动检查：占位符残留、Tab 切换、Causal Chain、Type Selector、Accordion、Timeline、Before/After、Story Card、Quote Card、Questions、Source Toggle、移动端响应式、data-source 属性。
+
+#### 人工逐项验证
 - [ ] 所有 Tab 可切换、所有按钮可点且有响应
 - [ ] 无残留占位符（无 `{{...}}`、TODO、xxx、空数据块）
 - [ ] JSON 里每个声明的组件都真实渲染在 HTML 中
