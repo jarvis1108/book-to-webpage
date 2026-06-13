@@ -302,6 +302,13 @@ INDEX.md 是常驻小核心（~4K），含 Core Frameworks + 章节索引 + 主�
 9. 把 `{{footer_note}}` 设为脚注
 10. 输出 `<书名>-<主题>.html`
 
+**JS 安全规则（CRITICAL — 违反会导致页面按钮全部失效）：**
+
+1. **用 `function()` 而非 `=>`**：箭头函数在脚本标签内可能导致解析差异。始终用 `document.querySelectorAll(".tab").forEach(function(t){ ... });`
+2. **JS 字符串内禁用中文引号 `""`**：`"硬资产"` 这种中文引号在 JS 字符串中可能被误读为字符串边界，导致 JS 执行中断。改为直接写 `硬资产`（去掉引号）或改用其他符号。
+3. **DOM 操作前加 null 守卫**：`var el = document.getElementById("x"); if (el) { el.onclick = ...; }`
+4. **用 `var` 声明变量**：不用 `const/let`，最大化浏览器兼容性。
+
 ### Step 2.7 自检
 
 逐项验证：

@@ -36,8 +36,7 @@
       width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
       padding: 32px 0 44px;
-      position: relative;
-      z-index: 0;
+      isolation: isolate;
     }
 
     /* ——— Hero ——— */
@@ -102,8 +101,7 @@
       padding: 10px;
       margin: 12px 0 28px;
       border: 1px solid var(--line);
-      background: rgba(248, 242, 231, .88);
-      backdrop-filter: blur(14px);
+      background: rgba(248, 242, 231, .95);
     }
 
     .tab {
@@ -113,6 +111,9 @@
       background: transparent;
       cursor: pointer;
       font: 800 16px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+      pointer-events: auto;
+      position: relative;
+      z-index: 1;
     }
 
     .tab[aria-selected="true"] {
@@ -760,11 +761,14 @@
     <footer class="footer">{{footer_note}}</footer>
   </main>
   <script>
-    document.getElementById("srcToggle").onclick = function() {
-      document.body.classList.toggle("show-sources");
-      this.classList.toggle("active");
-      this.textContent = document.body.classList.contains("show-sources") ? "隐藏出处" : "显示出处";
-    };
+    var toggle = document.getElementById("srcToggle");
+    if (toggle) {
+      toggle.onclick = function() {
+        document.body.classList.toggle("show-sources");
+        this.classList.toggle("active");
+        this.textContent = document.body.classList.contains("show-sources") ? "隐藏出处" : "显示出处";
+      };
+    }
     {{component_scripts}}
   </script>
 </body>
