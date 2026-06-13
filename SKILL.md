@@ -207,23 +207,69 @@ INDEX.md 是常驻小核心（~4K），含 Core Frameworks + 章节索引 + 主�
 
 每个顶层数组对应一个概述专用组件。
 
-### Step 2.5 挑组件
+### Step 2.5 挑组件（按内容性质决策，非简单映射）
 
-**theme 模式：**
-- **核心固定**（每页必有）：Hero + 一句话总论 + 分区导航（sticky Tab）
-- **主题特色**（按 signature 挑 1-2 个）：
-  - 因果链类 → `causal_chain`
-  - 多并列类别 → `type_selector`
-  - 多维权衡 → `matrix`
-  - 历史演进 → `timeline`
-  - 分支判断 → `decision_tree`
-  - 读者自检 → `questions`
-  - 多数主题配 2 个（一主一辅）
+**先判断内容性质，再选最合适的组件。** 一套主题内容往往适配多种组件，Agent 需要根据内容的逻辑结构来挑选 1-2 个。
 
-**overview 模式：**
+#### 内容性质 → 组件 决策矩阵
+
+| 内容性质 | 判断依据 | 首选组件 | 备选 |
+|---------|---------|---------|------|
+| 因果推进 | 有明显的"A→B→C→D"链条 | `causal_chain` | accordion |
+| 历史演进 | 按时间顺序展开的事件 | `timeline` | story_card |
+| 多类别并列 | 几类事物各有特点，适合分类比较 | `type_selector` | matrix |
+| 多维权衡 | 需要对比选项在多个维度上的优劣 | `matrix` | before_after |
+| 决策分叉 | "如果X则Y，如果A则B"的条件逻辑 | `decision_tree` | accordion |
+| 案例叙事 | 有具体人物/事件/情境的生动故事 | `story_card` | quote_card |
+| 政策/制度变迁 | 同一个事物在某个节点前后的状态对比 | `before_after` | timeline |
+| 核心论述（分层） | "先给结论再给论证"，需控制信息密度 | `accordion` | decision_tree |
+| 重要原话 | 需要保留作者精确表述、有冲击力的原文 | `quote_card` | story_card |
+| 读者自检 | 从知识到行动的转化 | `questions` | decision_tree |
+
+**挑选逻辑：**
+1. 优先看内容的**主要逻辑结构**（因果/时间/分类/对比/条件），选最匹配的组件
+2. 如果内容中有**特别生动的案例故事**，优先用 `story_card` 呈现
+3. 如果想引用**作者原话**增加说服力，搭配 `quote_card`
+4. 多数主题配 **2 个特色组件**（一主一辅，互补呈现）
+
+**theme 模式固定：**
+- 核心固定（每页必有）：Hero + 一句话总论 + 分区导航（sticky Tab）
+
+**overview 模式固定：**
 - 核心固定 + 概述专用：`frameworks` 卡片网格 + `chapterMap` + `conceptMap` + `decisionRules`
 
 从 `templates/components.md` 取对应范式，填入 JSON 数据。
+
+### Step 2.5b 标注出处来源（关键新增）
+
+**每个内容块必须标注原文出处。** 这既是学术诚信，也帮助读者溯源深入阅读。
+
+#### 出处信息格式
+
+```
+第X章 第Y节 · 约第N-M页
+```
+
+例如：`第二章 第二节 · 约第95-110页`
+
+#### 标注方法（A + B 混合方案）
+
+**A — Margin 标记（默认可见，低调）：**
+每个有出处的 HTML 元素加上 `data-source` 属性：
+```html
+<article class="note" data-source="第二章 第二节 · 约第95-110页">
+```
+样式自动处理：左侧 3px 细色条（hover 变蓝）、hover 时弹出 tooltip 显示来源。
+
+**B — 全局"显示出处"开关：**
+页面右上角固定按钮 "显示出处"，点击后所有内容块下方浮现灰色小字出处行。base.html 已内置此按钮和 JS 逻辑（`srcToggle` → `body.show-sources`），Agent 无需额外处理。
+
+#### 标注规则
+
+1. **每块内容必标**：note、story、timeline-item、question、accordion details、quote、explain、ba-col 等都要带 `data-source`
+2. **页数估算方法**：从 `metadata.json` 取总页数，按章节在全文中的位置比例估算页码范围。例如 306 页的书，第 2 章从全文 13% 位置开始、26% 位置结束 → 约第 40-80 页
+3. **精度要求**：标注到"节约N-M页"即可，不要求精确到具体页数
+4. **同一来源合并**：同一 Panel 内多个内容块来源相同时，每块仍标注（方便读者逐条溯源）
 
 ### Step 2.6 三层渲染产出 HTML
 
@@ -264,6 +310,9 @@ INDEX.md 是常驻小核心（~4K），含 Core Frameworks + 章节索引 + 主�
 - [ ] JSON 里每个声明的组件都真实渲染在 HTML 中
 - [ ] 移动端（≤880px / ≤520px）不溢出
 - [ ] 衔接层齐全（每分区有段首引语、卡片标题口语化、组件间有过渡）
+- [ ] **每个内容块有 `data-source` 属性**，出处格式正确（"第X章 第Y节 · 约第N-M页"）
+- [ ] 页数估算合理（根据 metadata.json 总页数按章节位置比例推算）
+- [ ] 页面右上角"显示出处"开关可切换、tooltip hover 可显示
 
 ### Step 2.8 清理工作目录
 
@@ -300,6 +349,5 @@ rm -rf "<workdir>/book_skill_work"
 ## 不在本次范围
 
 - 语义搜索（当前只用关键词 grep）
-- 更多组件 / 更复杂交互
 - 多主题站点（当前只做单主题单页）
 - 展示层换肤（当前锁定参考例子美学）

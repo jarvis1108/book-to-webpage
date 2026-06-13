@@ -175,10 +175,12 @@ document.querySelectorAll(".matrix tbody tr").forEach(r=>{
 
 适用：读者自检/行动指南。
 
+`{{component_styles}}` 不必加（样式已在 base.html）。每个 question 需加 `data-source`。
+
 ```html
 <div class="questions">
   {{#questions}}
-  <article class="question">
+  <article class="question" data-source="{{source}}">
     <div>
       <h3>{{title}}</h3>
       <p>{{hint}}</p>
@@ -186,6 +188,64 @@ document.querySelectorAll(".matrix tbody tr").forEach(r=>{
   </article>
   {{/questions}}
 </div>
+```
+
+### signature="story_card" — 案例叙事卡
+
+适用：用完整案例传递大逻辑。复现书中的具体故事（如石牌村鸭仔饭老板、年轻情侣买房），让读者通过微型叙事理解抽象机制。
+
+```html
+<article class="story" data-source="{{source}}">
+  <div class="story-label">{{label}}</div>
+  <h3>{{title}}</h3>
+  <p>{{body}}</p>
+  <div class="story-insight">{{insight}}</div>
+</article>
+```
+
+### signature="before_after" — 政策变迁对比
+
+适用：对比同一事物在某个政策/事件前后状态变化。如"分税制前 vs 分税制后"、"四万亿前 vs 四万亿后"。
+
+```html
+<div class="before-after">
+  <div class="ba-col before" data-source="{{before_source}}">
+    <div class="ba-label">{{before_label}}</div>
+    <h3>{{before_title}}</h3>
+    <p>{{before_body}}</p>
+  </div>
+  <div class="ba-col after" data-source="{{after_source}}">
+    <div class="ba-label">{{after_label}}</div>
+    <h3>{{after_title}}</h3>
+    <p>{{after_body}}</p>
+  </div>
+</div>
+```
+
+### signature="accordion" — 分层揭示
+
+适用：按层次展开论述，控制信息密度。读者先看到结论（summary），有兴趣再展开看详细论述。适合"先给答案再给论证"的内容。
+
+```html
+<div class="accordion">
+  {{#items}}
+  <details data-source="{{source}}" {{#first}}open{{/first}}>
+    <summary>{{title}}</summary>
+    <div class="acc-body">{{body}}</div>
+  </details>
+  {{/items}}
+</div>
+```
+
+### signature="quote_card" — 原话引用
+
+适用：需要保留作者精确表述或原文中有冲击力的段落。用引号装饰 + 出处标注，视觉区别于普通正文。
+
+```html
+<figure class="quote" data-source="{{source}}">
+  <blockquote>{{text}}</blockquote>
+  <figcaption class="q-source">{{attribution}}</figcaption>
+</figure>
 ```
 
 ---

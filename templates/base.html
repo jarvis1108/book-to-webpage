@@ -471,6 +471,231 @@
       text-align: center;
     }
 
+    /* ——— Story Card ——— */
+    .story {
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 240, .72);
+      padding: 24px 28px;
+      margin: 18px 0;
+      box-shadow: var(--shadow);
+    }
+
+    .story .story-label {
+      color: var(--red);
+      font: 700 13px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+      margin-bottom: 10px;
+    }
+
+    .story h3 {
+      margin: 0 0 14px;
+      font: 900 22px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .story p {
+      margin: 0 0 10px;
+      color: #3d332b;
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    .story .story-insight {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--line);
+      color: var(--blue);
+      font: 700 17px/1.6 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    /* ——— Before/After ——— */
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin: 18px 0;
+    }
+
+    .ba-col {
+      padding: 22px;
+      background: rgba(255, 250, 240, .62);
+      border: 1px solid var(--line);
+    }
+
+    .ba-col.before { border-left: 4px solid var(--muted); }
+    .ba-col.after  { border-left: 4px solid var(--green); }
+
+    .ba-col .ba-label {
+      font: 700 13px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+      margin-bottom: 12px;
+    }
+
+    .ba-col.before .ba-label { color: var(--muted); }
+    .ba-col.after  .ba-label { color: var(--green); }
+
+    .ba-col h3 {
+      margin: 0 0 10px;
+      font: 900 18px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .ba-col p {
+      margin: 0;
+      color: #44392f;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* ——— Accordion ——— */
+    .accordion details {
+      margin-bottom: 6px;
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 240, .62);
+    }
+
+    .accordion summary {
+      padding: 16px 20px;
+      cursor: pointer;
+      font: 800 17px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+      list-style: none;
+    }
+
+    .accordion summary::-webkit-details-marker { display: none; }
+
+    .accordion summary::before {
+      content: "+";
+      display: inline-block;
+      width: 20px;
+      margin-right: 8px;
+      color: var(--gold);
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .accordion details[open] summary::before { content: "−"; }
+
+    .accordion .acc-body {
+      padding: 0 20px 16px 44px;
+      color: #44392f;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* ——— Quote Card ——— */
+    .quote {
+      position: relative;
+      padding: 28px 32px 22px;
+      margin: 18px 0;
+      border-left: 4px solid var(--gold);
+      background: rgba(255, 250, 240, .72);
+      box-shadow: var(--shadow);
+    }
+
+    .quote::before {
+      content: "\201C";
+      position: absolute;
+      top: -8px;
+      left: 8px;
+      color: var(--gold);
+      font: 900 64px/1 "Songti SC", "Noto Serif CJK SC", serif;
+      opacity: .35;
+    }
+
+    .quote blockquote {
+      margin: 0;
+      color: #3d332b;
+      font-size: 19px;
+      line-height: 1.8;
+      font-style: normal;
+    }
+
+    .quote .q-source {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font: 13px/1.4 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    /* ——— Source Markers (A+B: margin + toggle) ——— */
+    .src-toggle {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 10;
+      padding: 7px 14px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: rgba(248, 242, 231, .92);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      font: 12px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--muted);
+      transition: all .2s;
+    }
+
+    .src-toggle:hover { border-color: var(--gold); color: var(--ink); }
+
+    /* ——— A: Margin marker (always visible, subtle) ——— */
+    .note[data-source],
+    .story[data-source],
+    .question[data-source],
+    .timeline-item[data-source],
+    .ba-col[data-source],
+    .accordion details[data-source],
+    .quote[data-source],
+    .explain[data-source] {
+      position: relative;
+      padding-left: 26px;
+      border-left: 3px solid var(--line);
+      transition: border-color .2s;
+    }
+
+    .note[data-source]:hover,
+    .story[data-source]:hover,
+    .question[data-source]:hover,
+    .timeline-item[data-source]:hover,
+    .ba-col[data-source]:hover,
+    .accordion details[data-source]:hover,
+    .quote[data-source]:hover,
+    .explain[data-source]:hover {
+      border-left-color: var(--blue);
+    }
+
+    /* Tooltip on hover */
+    [data-source]::after {
+      content: attr(data-source);
+      position: absolute;
+      left: -4px;
+      bottom: calc(100% + 4px);
+      padding: 3px 8px;
+      background: var(--ink);
+      color: var(--white);
+      font: 11px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+      border-radius: 3px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+      z-index: 3;
+    }
+
+    [data-source]:hover::after {
+      opacity: 1;
+    }
+
+    /* ——— B: Global toggle ON → show full source lines ——— */
+    body.show-sources .note::before,
+    body.show-sources .story::before,
+    body.show-sources .question::before,
+    body.show-sources .timeline-item::before,
+    body.show-sources .ba-col::before,
+    body.show-sources .accordion details::before,
+    body.show-sources .quote::before,
+    body.show-sources .explain::before {
+      content: attr(data-source);
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font: 11px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
     /* ——— Footer ——— */
     .footer {
       margin-top: 34px;
@@ -525,6 +750,7 @@
   </style>
 </head>
 <body>
+  <button id="srcToggle" class="src-toggle" title="显示/隐藏出处">显示出处</button>
   <main class="page">
     {{hero}}
     <nav class="tabs" aria-label="学习模块">{{tabs}}</nav>
@@ -532,6 +758,11 @@
     <footer class="footer">{{footer_note}}</footer>
   </main>
   <script>
+    document.getElementById("srcToggle").onclick = function() {
+      document.body.classList.toggle("show-sources");
+      this.classList.toggle("active");
+      this.textContent = document.body.classList.contains("show-sources") ? "隐藏出处" : "显示出处";
+    };
     {{component_scripts}}
   </script>
 </body>
