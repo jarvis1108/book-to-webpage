@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}}</title>
+  <style>
+    :root {
+      --ink: #171411;
+      --muted: #6d6258;
+      --paper: #f8f2e7;
+      --paper-deep: #ece1cf;
+      --line: #d8c8af;
+      --red: #b9422f;
+      --blue: #245f73;
+      --green: #4d6f48;
+      --gold: #c2872d;
+      --white: #fffaf0;
+      --shadow: 0 18px 50px rgba(55, 38, 19, .14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 22% 12%, rgba(194, 135, 45, .18), transparent 28rem),
+        linear-gradient(135deg, #fbf6ec 0%, #efe1ca 100%);
+      font-family: "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+    }
+
+    button { font: inherit; color: inherit; }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 44px;
+    }
+
+    /* ——— Hero ——— */
+    .hero {
+      min-height: 52vh;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 32px;
+      align-items: end;
+      padding: 48px 0 30px;
+    }
+
+    .eyebrow {
+      margin: 0 0 16px;
+      color: var(--red);
+      font: 700 14px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(44px, 7vw, 86px);
+      line-height: .98;
+      font-weight: 900;
+    }
+
+    .hero .lede {
+      margin: 22px 0 0;
+      max-width: 720px;
+      color: #3d332b;
+      font-size: 21px;
+      line-height: 1.7;
+    }
+
+    .thesis {
+      border-left: 7px solid var(--red);
+      background: rgba(255, 250, 240, .72);
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .thesis strong {
+      display: block;
+      margin-bottom: 12px;
+      font: 800 18px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .thesis span {
+      display: block;
+      color: #42382e;
+      font-size: 18px;
+      line-height: 1.75;
+    }
+
+    /* ——— Tabs ——— */
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      margin: 12px 0 28px;
+      border: 1px solid var(--line);
+      background: rgba(248, 242, 231, .88);
+      backdrop-filter: blur(14px);
+    }
+
+    .tab {
+      min-height: 52px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      font: 800 16px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .tab[aria-selected="true"] {
+      color: var(--white);
+      background: var(--ink);
+    }
+
+    /* ——— Panels ——— */
+    .panel {
+      display: none;
+      animation: rise .36s ease both;
+    }
+
+    .panel.active { display: block; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      margin: 0 0 18px;
+      font: 900 30px/1.15 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .section-lead {
+      margin: 0 0 24px;
+      color: #3d332b;
+      font-size: 18px;
+      line-height: 1.75;
+    }
+
+    /* ——— Grid & Note cards ——— */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .note {
+      min-height: 220px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 240, .62);
+    }
+
+    .note h3 {
+      margin: 0 0 12px;
+      font: 900 21px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .note p {
+      margin: 0;
+      color: #44392f;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .note .when {
+      margin-top: 10px;
+      color: var(--muted);
+      font: 14px/1.5 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    /* ——— Chain ——— */
+    .chain {
+      display: grid;
+      gap: 8px;
+      margin: 24px 0 8px;
+    }
+
+    .chain button {
+      min-height: 88px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: var(--white);
+      cursor: pointer;
+      text-align: left;
+      font: 800 15px/1.35 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .chain button.active {
+      color: var(--white);
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .explain {
+      min-height: 118px;
+      margin-top: 10px;
+      padding: 22px;
+      color: #332a22;
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 240, .8);
+      font-size: 18px;
+      line-height: 1.75;
+    }
+
+    /* ——— Split / Selector ——— */
+    .split {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .city-buttons {
+      display: grid;
+      gap: 10px;
+    }
+
+    .city-buttons button {
+      min-height: 58px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      background: var(--white);
+      cursor: pointer;
+      text-align: left;
+      font: 800 17px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .city-buttons button.active {
+      color: var(--white);
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .result {
+      padding: 28px;
+      min-height: 300px;
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 240, .72);
+      box-shadow: var(--shadow);
+    }
+
+    .result .label {
+      color: var(--red);
+      font: 800 14px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .result h3 {
+      margin: 10px 0 12px;
+      font: 900 28px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .result p {
+      margin: 0 0 12px;
+      color: #3f352b;
+      font-size: 18px;
+      line-height: 1.75;
+    }
+
+    /* ——— Questions ——— */
+    .questions {
+      display: grid;
+      gap: 12px;
+      counter-reset: q;
+    }
+
+    .question {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 240, .68);
+    }
+
+    .question::before {
+      counter-increment: q;
+      content: counter(q);
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      color: var(--white);
+      background: var(--gold);
+      font: 900 22px/1 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .question h3 {
+      margin: 0 0 4px;
+      font: 900 18px/1.25 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .question p {
+      margin: 0;
+      color: var(--muted);
+      font: 15px/1.55 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    /* ——— Matrix ——— */
+    table.matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font: 16px/1.5 "Songti SC", "Noto Serif CJK SC", serif;
+    }
+
+    .matrix th, .matrix td {
+      padding: 12px 10px;
+      border: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .matrix th {
+      background: rgba(255, 250, 240, .72);
+      font: 800 14px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .matrix td:first-child { font-weight: 700; }
+
+    /* ——— Timeline ——— */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+      border-left: 2px solid var(--gold);
+    }
+
+    .timeline-item {
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -30px;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .timeline-item .time {
+      color: var(--muted);
+      font: 700 13px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .timeline-item h3 {
+      margin: 4px 0 6px;
+      font: 900 18px/1.25 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .timeline-item p {
+      margin: 0;
+      color: #44392f;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* ——— Decision Tree ——— */
+    .decision details {
+      margin-bottom: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 240, .62);
+    }
+
+    .decision summary {
+      padding: 14px 18px;
+      cursor: pointer;
+      font: 800 16px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .decision .branch {
+      padding: 0 18px 14px;
+      color: #44392f;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* ——— Concept Map ——— */
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px;
+    }
+
+    .concept-btn {
+      min-height: 52px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      background: var(--white);
+      cursor: pointer;
+      font: 700 14px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .concept-btn.active {
+      color: var(--white);
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+
+    /* ——— Chapter Map ——— */
+    .chapter-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .chapter-row {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 12px;
+      align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .chapter-row .ch-label {
+      color: var(--red);
+      font: 700 14px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .chapter-row h3 {
+      margin: 0 0 2px;
+      font: 900 17px/1.25 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .chapter-row .ch-role {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ——— Decision Rules ——— */
+    .rules {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .rules li {
+      padding: 14px 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 250, 240, .62);
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .rules li strong { color: var(--blue); }
+
+    .rules li em {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 14px;
+      font-style: normal;
+    }
+
+    /* ——— Transition ——— */
+    .transition {
+      margin: 28px 0 12px;
+      color: #4a3f35;
+      font-size: 17px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    /* ——— Footer ——— */
+    .footer {
+      margin-top: 34px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font: 14px/1.7 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    /* ——— Responsive ——— */
+    @media (max-width: 880px) {
+      .hero,
+      .split,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+        padding-top: 28px;
+      }
+
+      .tabs {
+        position: static;
+        grid-template-columns: 1fr;
+      }
+
+      .chain {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .concept-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        width: min(100% - 22px, 1180px);
+        padding-top: 18px;
+      }
+
+      h1 { font-size: 42px; }
+      .hero .lede { font-size: 18px; }
+      .chain { grid-template-columns: 1fr; }
+      .question { grid-template-columns: 1fr; }
+      .chapter-row { grid-template-columns: 1fr; }
+    }
+
+    /* ——— Component-specific styles injected by Agent ——— */
+    {{component_styles}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    {{hero}}
+    <nav class="tabs" aria-label="学习模块">{{tabs}}</nav>
+    {{panels}}
+    <footer class="footer">{{footer_note}}</footer>
+  </main>
+  <script>
+    {{component_scripts}}
+  </script>
+</body>
+</html>
