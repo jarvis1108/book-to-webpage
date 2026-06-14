@@ -940,7 +940,9 @@
       document.getElementById("ddSubmit").onclick = function() {
         var q = input.value.trim();
         if (!q) { showToast("请输入你的问题"); return; }
-        var prompt = "在《" + document.title.split("《")[1].split("》")[0] + "》中，关于「" + titleEl.textContent.replace("追问「","").replace("」","") + "」，我想深入追问：" + q + "。（参考出处：" + currentRef + "）";
+        var bookName = document.title.split("《")[1].split("》")[0];
+        var concept = titleEl.textContent.replace("追问「","").replace("」","");
+        var prompt = "对《" + bookName + "》中「" + concept + "」，深入追问：" + q + "。\n\n请用 book-to-webpage skill 生成一个交互 HTML 页面来回答这个问题。知识库路径：" + document.title + "，出处：" + currentRef;
         navigator.clipboard.writeText(prompt).then(function() {
           overlay.classList.remove("active");
           showToast("追问 prompt 已复制，贴回 Claude 对话即可");
