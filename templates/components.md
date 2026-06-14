@@ -331,6 +331,20 @@ document.querySelectorAll(".concept-btn").forEach(b=>{
 
 ---
 
+### 追问按钮（每个内容块必有）
+
+每个可追问的组件内部加一个 `<button class="deep-dive-btn"`，hover 可见。JS 通过 `data-concept` + `data-source` 自动构建上下文 prompt。**这是方案2的核心——让用户从页面直接发起深入追问。**
+
+```html
+<button class="deep-dive-btn" title="追问这个概念" onclick="openDeepDive('{{concept_name}}','{{source}}')">?</button>
+```
+
+`{{concept_name}}` = 该内容块的核心概念（如"隐性担保"），`{{source}}` = 与 `data-source` 相同。
+
+按钮样式由 base.html 统一提供（hover 可见、click 弹窗）。
+
+---
+
 ## 页面拼装流程
 
 1. 读 base.html 骨架

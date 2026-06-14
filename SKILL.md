@@ -240,7 +240,23 @@ INDEX.md 是常驻小核心（~4K），含 Core Frameworks + 章节索引 + 主�
 
 从 `templates/components.md` 取对应范式，填入 JSON 数据。
 
-### Step 2.5b 标注出处来源（关键新增）
+### Step 2.5b 嵌入追问入口（方案2 — 每个内容块内置深挖按钮）
+
+每个带 `data-source` 的内容块（note / story / timeline-item / ba-col / accordion details / quote / explain / question）必须在内部末尾加上追问按钮：
+
+```html
+<button class="deep-dive-btn" title="追问这个概念"
+  onclick="openDeepDive('{{概念名}}','{{data-source值}}')">?</button>
+```
+
+- `{{概念名}}` = 该块的标题/核心概念（如 `隐性担保`、`土地财政`）
+- `{{data-source值}}` = 与所在元素的 `data-source` 属性相同
+
+按钮默认 `opacity:0`，hover 父元素时浮现。点击后弹出全局遮罩层，用户输入追问内容，提交后自动将上下文 prompt 复制到剪贴板。
+
+**base.html 已内置完整 JS**（`openDeepDive()` 函数 + overlay + toast），Agent 只需在组件内加这行 HTML。
+
+### Step 2.5c 标注出处来源
 
 **每个内容块必须标注原文出处。** 这既是学术诚信，也帮助读者溯源深入阅读。
 

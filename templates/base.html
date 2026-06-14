@@ -699,6 +699,128 @@
       font: 11px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
     }
 
+    /* ——— Deep Dive (追问入口) ——— */
+    .deep-dive-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--muted);
+      cursor: pointer;
+      font: 700 14px/1 "PingFang SC", "Microsoft YaHei", sans-serif;
+      opacity: 0;
+      transition: opacity .2s;
+      z-index: 2;
+    }
+
+    .note:hover .deep-dive-btn,
+    .story:hover .deep-dive-btn,
+    .question:hover .deep-dive-btn,
+    .timeline-item:hover .deep-dive-btn,
+    .ba-col:hover .deep-dive-btn,
+    .accordion details:hover .deep-dive-btn,
+    .quote:hover .deep-dive-btn,
+    .explain:hover .deep-dive-btn {
+      opacity: .65;
+    }
+
+    .deep-dive-btn:hover { opacity: 1 !important; background: var(--blue); color: var(--white); border-color: var(--blue); }
+
+    /* ——— Deep Dive Popover ——— */
+    .dd-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(23, 20, 17, .35);
+      backdrop-filter: blur(2px);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dd-overlay.active { display: flex; }
+
+    .dd-popover {
+      width: min(520px, calc(100% - 32px));
+      padding: 28px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+    }
+
+    .dd-popover .dd-title {
+      margin: 0 0 6px;
+      font: 900 22px/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .dd-popover .dd-ctx {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font: 13px/1.5 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .dd-popover textarea {
+      width: 100%;
+      min-height: 72px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font: 16px/1.6 "PingFang SC", "Songti SC", sans-serif;
+      color: var(--ink);
+      background: var(--white);
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+
+    .dd-popover .dd-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dd-popover .dd-submit {
+      padding: 10px 22px;
+      border: 0;
+      border-radius: 4px;
+      background: var(--blue);
+      color: var(--white);
+      cursor: pointer;
+      font: 700 15px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .dd-popover .dd-cancel {
+      padding: 10px 18px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      font: 700 15px/1.3 "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--muted);
+    }
+
+    /* ——— Toast ——— */
+    .dd-toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 28px;
+      background: var(--ink);
+      color: var(--white);
+      border-radius: 6px;
+      font: 14px/1.4 "PingFang SC", "Microsoft YaHei", sans-serif;
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+      z-index: 300;
+    }
+
+    .dd-toast.show { opacity: 1; }
+
     /* ——— Footer ——— */
     .footer {
       margin-top: 34px;
@@ -760,6 +882,20 @@
     {{panels}}
     <footer class="footer">{{footer_note}}</footer>
   </main>
+
+  <div class="dd-overlay" id="ddOverlay">
+    <div class="dd-popover">
+      <p class="dd-title" id="ddTitle"></p>
+      <p class="dd-ctx" id="ddCtx"></p>
+      <textarea id="ddInput" placeholder="输入你想追问的细节..."></textarea>
+      <div class="dd-actions">
+        <button class="dd-submit" id="ddSubmit">复制追问到剪贴板</button>
+        <button class="dd-cancel" id="ddCancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="dd-toast" id="ddToast"></div>
   <script>
     var toggle = document.getElementById("srcToggle");
     if (toggle) {
@@ -769,6 +905,50 @@
         this.textContent = document.body.classList.contains("show-sources") ? "隐藏出处" : "显示出处";
       };
     }
+    // Deep dive popover
+    (function() {
+      var overlay = document.getElementById("ddOverlay");
+      var titleEl = document.getElementById("ddTitle");
+      var ctxEl = document.getElementById("ddCtx");
+      var input = document.getElementById("ddInput");
+      var toast = document.getElementById("ddToast");
+      var currentRef = "";
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add("show");
+        setTimeout(function() { toast.classList.remove("show"); }, 2000);
+      }
+
+      window.openDeepDive = function(conceptName, source, el) {
+        currentRef = source;
+        titleEl.textContent = "追问「" + conceptName + "」";
+        ctxEl.textContent = "来源：" + source + "  |  将生成一个结构化的追问 prompt 复制到剪贴板，贴回对话即可深入。";
+        input.value = "";
+        overlay.classList.add("active");
+        setTimeout(function() { input.focus(); }, 200);
+      };
+
+      document.getElementById("ddCancel").onclick = function() {
+        overlay.classList.remove("active");
+      };
+
+      overlay.onclick = function(e) {
+        if (e.target === overlay) overlay.classList.remove("active");
+      };
+
+      document.getElementById("ddSubmit").onclick = function() {
+        var q = input.value.trim();
+        if (!q) { showToast("请输入你的问题"); return; }
+        var prompt = "在《" + document.title.split("《")[1].split("》")[0] + "》中，关于「" + titleEl.textContent.replace("追问「","").replace("」","") + "」，我想深入追问：" + q + "。（参考出处：" + currentRef + "）";
+        navigator.clipboard.writeText(prompt).then(function() {
+          overlay.classList.remove("active");
+          showToast("追问 prompt 已复制，贴回 Claude 对话即可");
+        }).catch(function() {
+          showToast("复制失败，请手动复制：" + prompt.substring(0, 60) + "...");
+        });
+      };
+    })();
     {{component_scripts}}
   </script>
 </body>
