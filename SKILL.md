@@ -148,22 +148,13 @@ INDEX.md 是常驻小核心（~4K），含 Core Frameworks + 章节索引 + 主�
 
 用户指定主题时，**先 grep full_text.md 验证书中确有相关内容**；命中 0 → 明确告知"本书未涉及该主题，建议尝试以下相关主题：…"，绝不瞎编。
 
-### Step 2.1b 选择风格（主题菜单）
+### Step 2.1b 主题处理（无需用户选择）
 
-判定模式后、渲染前，确定本页用哪个**视觉主题**。布局/交互不受影响，只换皮。
+HTML 页面**内置全部 6 套主题**（`warm-paper`/`minimal`/`dark`/`ink-wash`/`vintage-editorial`/`paper-ink`），通过右上角下拉菜单实时切换，默认使用 `warm-paper`。用户可在浏览器里自己切换，无需 Agent 生成前询问。
 
-**先看用户是否已点名主题**（在请求里提到下表任意 `theme_name` 或中文名/触发词）→ 直接用，不弹菜单。否则用 `AskUserQuestion` 弹菜单让用户选（默认推荐 `warm-paper`）：
+**如果用户明确点名某主题**（如"用极简风格"）→ 把 HTML 中 `<body data-theme="...">` 的初始值设为对应主题，`<select>` 的 `selected` 同步调整。否则默认暖纸典藏。
 
-| `theme_name` | 中文名 | 触发词 | 一句话 |
-|---|---|---|---|
-| `warm-paper` | 暖纸典藏（默认） | 暖纸 / 默认 / classic | 暖纸色 + 宋体 + 金红蓝绿，温润书卷气 |
-| `minimal` | 极简学术 | 极简 / 学术 / minimal / 大气简约 | 纯白留白 + 无衬线 + 单一岩蓝，瑞士国际主义 |
-| `dark` | 夜读深空 | 夜读 / 深色 / dark / 护眼 | 深墨背景 + 暖白文字 + 柔金，护眼夜读 |
-| `ink-wash` | 东方水墨 | 水墨 / 中式 / ink wash / 宣纸 | 宣纸白 + 水墨黑 + 朱砂红，中式人文 |
-| `vintage-editorial` | 复古编辑 | 复古 / 编辑 / vintage / 杂志 | 奶油净底 + 无衬线 + 砖红，英式杂志感 |
-| `paper-ink` | 纸墨风 | 纸墨 / 文学 / 杂志 / literary | 暖米纸 + 楷体 + 猩红，西式文学杂志 |
-
-记下选中的 `theme_id`，供 Step 2.6 拼装用。主题目录与设计要点见 `templates/themes/README.md`（单一真相源）。
+6 套主题的完整 CSS（`:root` 基准 + 5 个 `[data-theme="X"]` 覆盖块）直接写入 HTML 的 `<style>` 中，不依赖外部文件。主题目录见 `templates/themes/README.md`。
 
 ### Step 2.2 主题聚合的两级检索（关键差异化）
 
@@ -326,7 +317,7 @@ INDEX.md 是常驻小核心（~4K），含 Core Frameworks + 章节索引 + 主�
 **拼装流程：**
 
 1. 读 `templates/base.html` 骨架
-2. **读 `templates/themes/<theme_id>.css`（theme_id 来自 Step 2.1b），整段填入 `{{theme_style}}`；并设 `{{theme_name}}` = theme_id**（落在 `<body data-theme="...">`）
+2. **内联全部 6 套主题**：把 `:root` 默认变量（暖纸典藏）+ 5 个 `[data-theme="X"]` 覆盖块整段写入 `<style>`，并设 `<body data-theme="warm-paper">`（用户点名某主题则改初始值）；同时加入主题下拉菜单 HTML + JS（`<select class="theme-picker">` + localStorage 记忆）
 3. 设置 `{{lang}}`（中文书="zh-CN"）
 4. 设置 `{{title}}` = `《书名》- 主题`
 5. 把 Hero HTML 片段填入 `{{hero}}`
@@ -379,9 +370,10 @@ rm -rf "<workdir>/book_skill_work"
 
 页面布局/交互**完全不变**，只通过 CSS 变量换皮。`templates/base.html` 把字体/底色/纸面 tint/强调色全部抽成变量（`--font-body/--font-display/--bg/--surface/--ink/--red/--blue/--green/--gold/…`），组件 CSS 只引用变量、不写死颜色。
 
-- **4 个主题**（`templates/themes/*.css`）：`warm-paper`（暖纸典藏·默认）/ `minimal`（极简学术）/ `dark`（夜读深空）/ `ink-wash`（东方水墨）。详见 `templates/themes/README.md`。
-- **默认 = 暖纸典藏**：宋体正文 + PingFang 标题、暖纸色纸面 `#f8f2e7`、红蓝绿金强调、径向金光晕背景——与历史参考例子观感一致。
-- **换肤机制**：渲染前（Step 2.1b）选主题 → 把对应 `.css` 整段注入 `{{theme_style}}`（紧跟 `:root`，故覆盖生效），并在 `<body data-theme="…">` 标记。深色/水墨等反相需求由主题文件内的 `[data-theme="x"]` 局部覆盖处理。
+- **6 套主题**全部内联于每个生成的 HTML 页面中（`templates/themes/*.css`）：`warm-paper`（暖纸典藏·默认）/ `minimal`（极简学术）/ `dark`（夜读深空）/ `ink-wash`（东方水墨）/ `vintage-editorial`（复古编辑）/ `paper-ink`（纸墨风）。详见 `templates/themes/README.md`。
+- **默认 = 暖纸典藏**：宋体正文 + PingFang 标题、暖纸色纸面 `#f8f2e7`、红蓝绿金强调、径向金光晕背景。
+- **实时切换**：页面右上角内置主题下拉菜单，用户可在浏览器中一键切换 6 套皮肤，选择自动记忆（localStorage）。Agent 生成前无需询问用户偏好——除非用户明确指名某主题。
+- **换肤机制**：`:root` 保存默认变量（暖纸典藏），5 个 `[data-theme="X"]` 选择器覆盖对应主题的全部变量+组件微调。`<body data-theme="...">` 控制当前生效主题。
 - **单文件、零依赖**：CSS/JS 全部内联
 - **移动端自适应**：≤880px 单列、取消 sticky；≤520px 字号缩减、chain 单列
 - **无外部字体/图标/CDN**：仅用系统字体
