@@ -21,9 +21,20 @@ const { chromium } = require('/opt/homebrew/lib/node_modules/playwright');
     // 1. 检查占位符残留
     const html = await page.content();
     if (html.includes('{{') && html.includes('}}')) {
-      errors.push('❌ 残留占位符 {{...}}');
+      errors.push('❌ 残留占位符 {{...}}（可能含 {{theme_style}}/{{theme_name}} 未填）');
     } else {
       console.log('✅ 无占位符残留');
+    }
+
+    // 1b. 检查主题（body data-theme）
+    const theme = await page.getAttribute('body', 'data-theme');
+    const knownThemes = ['warm-paper', 'minimal', 'dark', 'ink-wash', 'vintage-editorial', 'paper-ink'];
+    if (!theme) {
+      errors.push('❌ <body> 缺少 data-theme 属性（{{theme_name}} 未填）');
+    } else if (!knownThemes.includes(theme)) {
+      errors.push('❌ 未知主题 data-theme="' + theme + '"，已知: ' + knownThemes.join('/'));
+    } else {
+      console.log('🎨 当前主题: ' + theme);
     }
 
     // 2. 验证 Tab

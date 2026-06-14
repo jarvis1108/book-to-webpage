@@ -2,7 +2,7 @@
 
 每个组件是一段可复制的 HTML/CSS/JS，带 `{{...}}` 数据槽位。Agent 按 JSON 内容契约的 `signature`/请求模式挑选对应范式，填入数据，拼进 base.html。
 
-美学锁定：宋体正文（Songti SC / Noto Serif CJK SC）、PingFang SC 标题、暖纸色调（见 base.html CSS 变量）。
+美学由**主题系统**决定（见 `templates/themes/README.md`）。base.html 已把字体/底色/纸面 tint/强调色全部抽成 CSS 变量，组件 CSS 只引用变量、不写死颜色。默认主题 = 暖纸典藏（宋体 + 暖纸 + 金红蓝绿）。
 
 ---
 
@@ -128,12 +128,12 @@ document.querySelectorAll(".city-btn").forEach(b=>{
 </table>
 ```
 
-交互增强（hover 高亮行）：`{{component_scripts}}` 里插入：
+交互增强（hover 高亮行）：`{{component_scripts}}` 里插入（用 class 切换，颜色由主题的 `--tint-accent` 控制，**不写死颜色**）：
 
 ```js
-document.querySelectorAll(".matrix tbody tr").forEach(r=>{
-  r.onmouseenter=()=>r.style.background="rgba(194,135,45,.12)";
-  r.onmouseleave=()=>r.style.background="";
+document.querySelectorAll(".matrix tbody tr").forEach(function(r){
+  r.onmouseenter=function(){r.classList.add("row-hi");};
+  r.onmouseleave=function(){r.classList.remove("row-hi");};
 });
 ```
 
@@ -301,14 +301,13 @@ document.querySelectorAll(".matrix tbody tr").forEach(r=>{
 `{{component_scripts}}` 里插入：
 
 ```js
-document.querySelectorAll(".concept-btn").forEach(b=>{
-  b.onclick=()=>{
+document.querySelectorAll(".concept-btn").forEach(function(b){
+  b.onclick=function(){
     b.classList.toggle("active");
-    // 高亮关联章节行（用 data-links 属性匹配 .chapter-row 的 data-ch）
-    const links=(b.dataset.links||"").split(",");
-    document.querySelectorAll(".chapter-row").forEach(r=>{
-      r.style.background=links.includes(r.dataset.ch)&&b.classList.contains("active")
-        ?"rgba(194,135,45,.15)":"";
+    // 高亮关联章节行（用 data-links 匹配 .chapter-row 的 data-ch；颜色由主题的 --tint-accent-strong 控制）
+    var links=(b.dataset.links||"").split(",");
+    document.querySelectorAll(".chapter-row").forEach(function(r){
+      r.classList.toggle("concept-hi", links.indexOf(r.dataset.ch)>=0 && b.classList.contains("active"));
     });
   };
 });

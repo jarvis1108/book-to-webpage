@@ -26,8 +26,9 @@ description: 把书（PDF/Markdown等）拆解成本地知识库，再据用户�
 
 | 文件 | 作用 | 用法 |
 |------|------|------|
-| `templates/base.html` | ①骨架层：页面壳、CSS 变量、布局、移动端断点、所有组件基础样式 | 抄，替换 `{{...}}` 槽位 |
+| `templates/base.html` | ①骨架层：页面壳、CSS 变量、布局、移动端断点、所有组件基础样式 | 抄，替换 `{{...}}` 槽位（含 `{{theme_style}}`/`{{theme_name}}`） |
 | `templates/components.md` | ②组件层：每个组件的 HTML/CSS/JS 范式 + 数据槽位 | 按 signature 挑范式，抄+填数据 |
+| `templates/themes/` | ③主题层：4 个 `.css`（暖纸典藏/极简学术/夜读深空/东方水墨）+ `README.md` 目录 | 选一个，整段注入 `{{theme_style}}` |
 | `scripts/extract.py` | 提取器入口（复制自 book-to-skill） | 阶段 1 跑 |
 | `scripts/extractor/` | 提取器包（复制自 book-to-skill） | 阶段 1 用 |
 
@@ -146,6 +147,23 @@ INDEX.md 是常驻小核心（~4K），含 Core Frameworks + 章节索引 + 主�
 | ③ 单章深读（可选） | 用户指定章号 | 读该章摘要 + 该章原文 | 单章页 |
 
 用户指定主题时，**先 grep full_text.md 验证书中确有相关内容**；命中 0 → 明确告知"本书未涉及该主题，建议尝试以下相关主题：…"，绝不瞎编。
+
+### Step 2.1b 选择风格（主题菜单）
+
+判定模式后、渲染前，确定本页用哪个**视觉主题**。布局/交互不受影响，只换皮。
+
+**先看用户是否已点名主题**（在请求里提到下表任意 `theme_name` 或中文名/触发词）→ 直接用，不弹菜单。否则用 `AskUserQuestion` 弹菜单让用户选（默认推荐 `warm-paper`）：
+
+| `theme_name` | 中文名 | 触发词 | 一句话 |
+|---|---|---|---|
+| `warm-paper` | 暖纸典藏（默认） | 暖纸 / 默认 / classic | 暖纸色 + 宋体 + 金红蓝绿，温润书卷气 |
+| `minimal` | 极简学术 | 极简 / 学术 / minimal / 大气简约 | 纯白留白 + 无衬线 + 单一岩蓝，瑞士国际主义 |
+| `dark` | 夜读深空 | 夜读 / 深色 / dark / 护眼 | 深墨背景 + 暖白文字 + 柔金，护眼夜读 |
+| `ink-wash` | 东方水墨 | 水墨 / 中式 / ink wash / 宣纸 | 宣纸白 + 水墨黑 + 朱砂红，中式人文 |
+| `vintage-editorial` | 复古编辑 | 复古 / 编辑 / vintage / 杂志 | 奶油净底 + 无衬线 + 砖红，英式杂志感 |
+| `paper-ink` | 纸墨风 | 纸墨 / 文学 / 杂志 / literary | 暖米纸 + 楷体 + 猩红，西式文学杂志 |
+
+记下选中的 `theme_id`，供 Step 2.6 拼装用。主题目录与设计要点见 `templates/themes/README.md`（单一真相源）。
 
 ### Step 2.2 主题聚合的两级检索（关键差异化）
 
@@ -308,15 +326,17 @@ INDEX.md 是常驻小核心（~4K），含 Core Frameworks + 章节索引 + 主�
 **拼装流程：**
 
 1. 读 `templates/base.html` 骨架
-2. 设置 `{{lang}}`（中文书="zh-CN"）
-3. 设置 `{{title}}` = `《书名》- 主题`
-4. 把 Hero HTML 片段填入 `{{hero}}`
-5. 把 Tab 按钮填入 `{{tabs}}`（`{{component_styles}}` 里设置 tabs 列数）
-6. 把各 Panel HTML 填入 `{{panels}}`
-7. 把 `{{component_styles}}` 设为组件专用 CSS
-8. 把 `{{component_scripts}}` 设为所有交互 JS
-9. 把 `{{footer_note}}` 设为脚注
-10. 输出 `<书名>-<主题>.html`
+2. **读 `templates/themes/<theme_id>.css`（theme_id 来自 Step 2.1b），整段填入 `{{theme_style}}`；并设 `{{theme_name}}` = theme_id**（落在 `<body data-theme="...">`）
+3. 设置 `{{lang}}`（中文书="zh-CN"）
+4. 设置 `{{title}}` = `《书名》- 主题`
+5. 把 Hero HTML 片段填入 `{{hero}}`
+6. 把 Tab 按钮填入 `{{tabs}}`（`{{component_styles}}` 里设置 tabs 列数）
+7. 把各 Panel HTML 填入 `{{panels}}`
+8. 把 `{{component_styles}}` 设为组件专用 CSS
+9. 把 `{{component_scripts}}` 设为所有交互 JS
+10. 把 `{{footer_note}}` 设为脚注
+11. 输出 `<书名>-<主题>.html`
+12. **同步保存文本版**：把 Step 2.3 重组后的完整叙事正文（连贯文本 + 作者原话 + 案例），另存为 `<书名>-<主题>.md`，与 HTML 同目录。内容含：Hero 标题/总论 + 各 Section 正文（去组件标记、纯可读叙事）+ 追问问题列表 + 出处来源标注。这是渲染前的那道完整叙事——不依赖 HTML 组件即可独立阅读，也方便后续引用/复用。
 
 **JS 安全规则（CRITICAL — 违反会导致页面按钮全部失效）：**
 
@@ -355,13 +375,13 @@ rm -rf "<workdir>/book_skill_work"
 
 ---
 
-## 美学基线（锁定参考例子）
+## 风格系统（主题换肤）
 
-所有 HTML 统一套用以下设计语言，CSS 变量定义在 `templates/base.html`：
+页面布局/交互**完全不变**，只通过 CSS 变量换皮。`templates/base.html` 把字体/底色/纸面 tint/强调色全部抽成变量（`--font-body/--font-display/--bg/--surface/--ink/--red/--blue/--green/--gold/…`），组件 CSS 只引用变量、不写死颜色。
 
-- **字体**：宋体正文（Songti SC / Noto Serif CJK SC / Georgia），PingFang SC 标题
-- **色调**：暖纸色纸面 `#f8f2e7`，强调色红 `#b9422f` / 蓝 `#245f73` / 绿 `#4d6f48` / 金 `#c2872d`
-- **背景**：径向渐变金色光晕 + 线性渐变纸面
+- **4 个主题**（`templates/themes/*.css`）：`warm-paper`（暖纸典藏·默认）/ `minimal`（极简学术）/ `dark`（夜读深空）/ `ink-wash`（东方水墨）。详见 `templates/themes/README.md`。
+- **默认 = 暖纸典藏**：宋体正文 + PingFang 标题、暖纸色纸面 `#f8f2e7`、红蓝绿金强调、径向金光晕背景——与历史参考例子观感一致。
+- **换肤机制**：渲染前（Step 2.1b）选主题 → 把对应 `.css` 整段注入 `{{theme_style}}`（紧跟 `:root`，故覆盖生效），并在 `<body data-theme="…">` 标记。深色/水墨等反相需求由主题文件内的 `[data-theme="x"]` 局部覆盖处理。
 - **单文件、零依赖**：CSS/JS 全部内联
 - **移动端自适应**：≤880px 单列、取消 sticky；≤520px 字号缩减、chain 单列
 - **无外部字体/图标/CDN**：仅用系统字体
@@ -383,4 +403,4 @@ rm -rf "<workdir>/book_skill_work"
 
 - 语义搜索（当前只用关键词 grep）
 - 多主题站点（当前只做单主题单页）
-- 展示层换肤（当前锁定参考例子美学）
+- 主题内可调子参数（字号/圆角等微调，当前每主题一套固定美学）
