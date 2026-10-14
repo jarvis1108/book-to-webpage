@@ -11,10 +11,10 @@ function fake(fail) {
   } };
 }
 
-test('bundled Chromium uses default launch', async () => {
+test('bundled Chromium uses its matching full browser channel', async () => {
   const chromium = fake();
   assert.equal(await launchBrowser(chromium, {}, () => true), 'browser');
-  assert.deepEqual(chromium.calls, [undefined]);
+  assert.deepEqual(chromium.calls, [{ channel: 'chromium' }]);
 });
 test('missing bundle falls back to installed Chrome', async () => {
   const chromium = fake();
@@ -47,5 +47,5 @@ test('conflicting selectors fail before launch', async () => {
 test('existing bundle launch errors are not hidden by fallback', async () => {
   const chromium = fake(true);
   await assert.rejects(launchBrowser(chromium, {}, () => true), /launch failed/);
-  assert.deepEqual(chromium.calls, [undefined]);
+  assert.deepEqual(chromium.calls, [{ channel: 'chromium' }]);
 });

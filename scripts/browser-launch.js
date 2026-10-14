@@ -10,7 +10,7 @@ async function launchBrowser(chromium, env = process.env, exists = existsSync) {
     return chromium.launch(channel ? { channel } : { executablePath });
   }
   if (exists(chromium.executablePath())) {
-    return chromium.launch();
+    return chromium.launch({ channel: 'chromium' });
   }
   try {
     return await chromium.launch({ channel: 'chrome' });
